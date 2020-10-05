@@ -1,0 +1,33 @@
+FROM ubuntu:latest
+RUN apt-get update && \
+ apt-get install -y python3 && \
+ apt-get install -y python3-pip && \
+ apt-get install -y libgl1-mesa-glx
+
+WORKDIR /app
+ADD . /app
+
+# Install dependencies
+RUN pip install -r requirements.txt
+
+# copying all files over
+COPY . /app
+
+RUN export DEBIAN_FRONTEND=noninteractive && \
+  apt-get install -yq libgtk2.0-dev
+
+# Expose port 
+ENV PORT 8501
+
+RUN bash -c 'echo -e "\
+[general]\n\
+email = \"\"\n\
+" > /root/.streamlit/credentials.toml'
+
+RUN bash -c 'echo -e "\
+[server]\n\
+enableCORS = false\n\
+" > /root/.streamlit/config.toml'
+
+# cmd to launch app when container is run
+CMD streamlit run app.py --server.port $PORT
